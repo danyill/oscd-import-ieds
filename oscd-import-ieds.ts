@@ -36,7 +36,7 @@ function uniqueNewIED(
   return !(duplicateNewIED || duplicateToExistingIEDs);
 }
 
-/** An editor [[`plugin`]] to configure `Report`, `GOOSE`, `SampledValue` control blocks and its `DataSet` */
+/** An editor [[`plugin`]] to import IEDs from SCL files */
 export default class ImportIEDsPlugin extends LitElement {
   /** The document being edited as provided to plugins by [[`OpenSCD`]]. */
   @property({ attribute: false })
@@ -64,9 +64,22 @@ export default class ImportIEDsPlugin extends LitElement {
     const scl = this.doc.querySelector('SCL')!;
 
     for await (const ied of ieds) {
-      this.dispatchEvent(newEditEvent(insertIed(scl, ied)));
+      // If IED exists remove it first
+      const existingIed = this.doc.querySelector(
+        `:root > IED[name="${ied.getAttribute('name')}"]`,
+      );
+      if (existingIed) {
+        this.dispatchEvent(newEditEvent({ node: existingIed }));
+      }
 
-      // ugly timeout that might resolve with newer versions of OpenSCD core
+      // import but don't bring in communication for existing IEDs
+      this.dispatchEvent(
+        newEditEvent(
+          insertIed(scl, ied, { addCommunicationSection: !existingIed }),
+        ),
+      );
+
+      // TODO: Fixme -- ugly timeout that might resolve with newer versions of OpenSCD core
       await setTimeout(() => {}, 100);
     }
   }
