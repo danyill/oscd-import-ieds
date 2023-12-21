@@ -9,7 +9,7 @@ import { Dialog } from '@material/web/dialog/internal/dialog';
 import '@openenergytools/filterable-lists/dist/selection-list.js';
 import type {
   SelectionList,
-  SelectItem
+  SelectItem,
 } from '@openenergytools/filterable-lists/dist/selection-list.js';
 
 import { newEditEvent } from '@openscd/open-scd-core';
@@ -23,14 +23,14 @@ type IEDImport = {
 function uniqueNewIED(
   doc: XMLDocument,
   newIED: Element,
-  ieds: IEDImport[]
+  ieds: IEDImport[],
 ): boolean {
   const duplicateNewIED = ieds.some(
-    ied => ied.ied.getAttribute('name') === newIED.getAttribute('name')
+    ied => ied.ied.getAttribute('name') === newIED.getAttribute('name'),
   );
 
   const duplicateToExistingIEDs = !!doc.querySelector(
-    `:root > IED[name="${newIED.getAttribute('name')}"]`
+    `:root > IED[name="${newIED.getAttribute('name')}"]`,
   );
 
   return !(duplicateNewIED || duplicateToExistingIEDs);
@@ -86,8 +86,8 @@ export default class ImportIEDsPlugin extends LitElement {
         .forEach(newIED =>
           ieds.push({
             ied: newIED,
-            unique: uniqueNewIED(this.doc, newIED, ieds)
-          })
+            unique: uniqueNewIED(this.doc, newIED, ieds),
+          }),
         );
     }
 
@@ -95,7 +95,7 @@ export default class ImportIEDsPlugin extends LitElement {
       headline: `${ied.ied.getAttribute('name')}`,
       supportingText: `${ied.ied.getAttribute('manufacturer')}`,
       attachedElement: ied.ied,
-      selected: ied.unique
+      selected: ied.unique,
     }));
 
     this.dialog.show();
@@ -108,7 +108,7 @@ export default class ImportIEDsPlugin extends LitElement {
           (<HTMLInputElement>target).value = '';
         }}
         @change=${this.loadIEDs}
-        id="importied-plugin-input"
+        id="importieds-plugin-input"
         accept=".iid,.cid,.icd,.scd,.sed,.ssd"
         type="file"
         multiple
@@ -137,6 +137,10 @@ export default class ImportIEDsPlugin extends LitElement {
       width: 0;
       height: 0;
       opacity: 0;
+    }
+
+    form {
+      padding: 10px;
     }
   `;
 }
