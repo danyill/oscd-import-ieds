@@ -4,7 +4,7 @@ import '@material/web/dialog/dialog';
 import { Dialog } from '@material/web/dialog/internal/dialog';
 import '@openenergytools/filterable-lists/dist/selection-list.js';
 import type { SelectionList, SelectItem } from '@openenergytools/filterable-lists/dist/selection-list.js';
-/** An editor [[`plugin`]] to configure `Report`, `GOOSE`, `SampledValue` control blocks and its `DataSet` */
+/** An editor [[`plugin`]] to import IEDs from SCL files */
 export default class ImportIEDsPlugin extends LitElement {
     /** The document being edited as provided to plugins by [[`OpenSCD`]]. */
     doc: XMLDocument;
