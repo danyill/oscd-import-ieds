@@ -36,6 +36,47 @@ function uniqueNewIED(
   return !(duplicateNewIED || duplicateToExistingIEDs);
 }
 
+function getIedDescription(ied: Element): {
+  firstLine: string;
+  secondLine: string;
+} {
+  const [
+    manufacturer,
+    type,
+    desc,
+    configVersion,
+    originalSclVersion,
+    originalSclRevision,
+    originalSclRelease,
+  ] = [
+    'manufacturer',
+    'type',
+    'desc',
+    'configVersion',
+    'originalSclVersion',
+    'originalSclRevision',
+    'originalSclRelease',
+  ].map(attr => ied?.getAttribute(attr));
+
+  const firstLine = [manufacturer, type]
+    .filter(val => val !== null)
+    .join(' - ');
+
+  const schemaInformation = [
+    originalSclVersion,
+    originalSclRevision,
+    originalSclRelease,
+  ]
+    .filter(val => val !== null)
+    .join('');
+
+  const secondLine = [desc, configVersion, schemaInformation]
+    .filter(val => val !== null)
+    .join(' - ');
+
+  return { firstLine, secondLine };
+}
+
 /** An editor [[`plugin`]] to import IEDs from SCL files */
 export default class ImportIEDsPlugin extends LitElement {
   /** The document being edited as provided to plugins by [[`OpenSCD`]]. */
@@ -51,7 +92,7 @@ export default class ImportIEDsPlugin extends LitElement {
 
   @query('input') input!: HTMLInputElement;
 
-  @query('#selection-dialog') dialog!: Dialog;
+  @query('#selection-dialog') dialogUI!: Dialog;
 
   @query('#selection-list') selectionList!: SelectionList;
 
@@ -104,14 +145,18 @@ export default class ImportIEDsPlugin extends LitElement {
         );
     }
 
-    this.items = ieds.map(ied => ({
-      headline: `${ied.ied.getAttribute('name')}`,
-      supportingText: `${ied.ied.getAttribute('manufacturer')}`,
-      attachedElement: ied.ied,
-      selected: ied.unique,
-    }));
+    this.items = ieds.map(ied => {
+      const { firstLine, secondLine } = getIedDescription(ied.ied);
 
-    this.dialog.show();
+      return {
+        headline: `${ied.ied.getAttribute('name')!} — ${firstLine}`,
+        supportingText: secondLine,
+        attachedElement: ied.ied,
+        selected: ied.unique,
+      };
+    });
+
+    this.dialogUI.show();
   }
 
   render() {
@@ -125,7 +170,10 @@ export default class ImportIEDsPlugin extends LitElement {
         accept=".iid,.cid,.icd,.scd,.sed,.ssd"
         type="file"
         multiple
-      /><md-dialog id="selection-dialog">
+      /><md-dialog
+        id="selection-dialog"
+        @cancel=${(event: Event) => event.preventDefault()}
+      >
         <form slot="content" id="selection" method="dialog">
           <selection-list
             id="selection-list"
@@ -134,6 +182,9 @@ export default class ImportIEDsPlugin extends LitElement {
           ></selection-list>
         </form>
         <div slot="actions">
+          <md-text-button @click=${() => this.dialogUI.close()}
+            >Close</md-text-button
+          >
           <md-text-button
             @click="${() => {
               this.importIEDs();
