@@ -29,8 +29,8 @@
   },
   "dependencies": {
     "@material/web": "^1.1.1",
-    "@openenergytools/filterable-lists": "^0.0.3",
-    "@openenergytools/scl-lib": "^0.11.18",
+    "@openenergytools/filterable-lists": "^0.0.4",
+    "@openenergytools/scl-lib": "^0.13.2",
     "@openscd/open-scd-core": "^0.0.2",
     "eslint-plugin-lit": "^1.11.0",
     "lit": "^3.1.0"
