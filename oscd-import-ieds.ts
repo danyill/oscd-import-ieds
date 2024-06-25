@@ -113,11 +113,8 @@ export default class ImportIEDsPlugin extends LitElement {
         this.dispatchEvent(newEditEvent({ node: existingIed }));
       }
 
-      // import but don't bring in communication for existing IEDs
       this.dispatchEvent(
-        newEditEvent(
-          insertIed(scl, ied, { addCommunicationSection: !existingIed }),
-        ),
+        newEditEvent(insertIed(scl, ied, { addCommunicationSection: true })),
       );
 
       // TODO: Fixme -- ugly timeout that might resolve with newer versions of OpenSCD core
