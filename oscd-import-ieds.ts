@@ -12,7 +12,7 @@ import type {
   SelectItem,
 } from '@openenergytools/filterable-lists/dist/selection-list.js';
 
-import { newEditEvent } from '@openscd/open-scd-core';
+import { Edit, newEditEvent } from '@openscd/open-scd-core';
 import { insertIed } from '@openenergytools/scl-lib';
 
 type IEDImport = {
@@ -105,13 +105,34 @@ export default class ImportIEDsPlugin extends LitElement {
     const scl = this.doc.querySelector('SCL')!;
 
     for await (const ied of ieds) {
-      // If IED exists remove it first
+      const iedName = ied.getAttribute('name');
+
+      // If IED exists remove it
       const existingIed = this.doc.querySelector(
-        `:root > IED[name="${ied.getAttribute('name')}"]`,
+        `:root > IED[name="${iedName}"]`,
       );
+
+      const removeEdits: Edit[] = [];
+
       if (existingIed) {
-        this.dispatchEvent(newEditEvent({ node: existingIed }));
+        removeEdits.push({ node: existingIed });
       }
+
+      // If IED has communications remove them
+      // TODO: Could have logic to remove the SubNetwork if required
+      const existingComms = Array.from(
+        this.doc.querySelectorAll(
+          `:root > Communication > SubNetwork > ConnectedAP[iedName="${iedName}"]`,
+        ),
+      );
+
+      if (existingComms) {
+        removeEdits.push(
+          existingComms.map(connectedAp => ({ node: connectedAp })),
+        );
+      }
+
+      this.dispatchEvent(newEditEvent(removeEdits));
 
       this.dispatchEvent(
         newEditEvent(insertIed(scl, ied, { addCommunicationSection: true })),
