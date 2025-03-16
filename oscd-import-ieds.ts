@@ -100,6 +100,32 @@ export default class ImportIEDsPlugin extends LitElement {
     this.input.click();
   }
 
+  clearSelection(): void {
+    if (this.selectionList) {
+      (
+        Array.from(
+          this.selectionList.shadowRoot!.querySelectorAll(
+            'md-list.listitems md-list-item md-checkbox',
+          ),
+          // eslint-disable-next-line no-undef
+        ) as any[]
+      ).forEach((cb): void => {
+        if (cb.checked) {
+          // eslint-disable-next-line no-param-reassign
+          cb.checked = false;
+          cb.dispatchEvent(new Event('change'));
+          cb.requestUpdate();
+        }
+      });
+
+      const searchField = (this.selectionList.shadowRoot!.querySelector(
+        'md-outlined-text-field[placeholder="search"]',
+      ) as any)!;
+      searchField.value = '';
+      searchField.dispatchEvent(new Event('input'));
+    }
+  }
+
   async importIEDs(): Promise<void> {
     const ieds = this.selectionList.selectedElements;
     const scl = this.doc.querySelector('SCL')!;
@@ -140,6 +166,8 @@ export default class ImportIEDsPlugin extends LitElement {
 
       // TODO: Fixme -- ugly timeout that might resolve with newer versions of OpenSCD core
       await setTimeout(() => {}, 100);
+
+      this.clearSelection();
     }
   }
 
